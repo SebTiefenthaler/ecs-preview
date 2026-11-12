@@ -54,6 +54,8 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 .kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border:1px solid var(--line);border-radius:var(--r);margin-top:24px;overflow:hidden}
 .kpis div{padding:16px 20px;display:flex;flex-direction:column-reverse;gap:2px}
 .kpis div + div{border-left:1px solid var(--line)}
+.kpis.k4{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media (max-width:720px){.kpis.k4{grid-template-columns:repeat(2,minmax(0,1fr))}.kpis.k4 div:nth-child(3){border-left:0}.kpis.k4 div:nth-child(n+3){border-top:1px solid var(--line)}}
 .kpis div b{font-size:28px;font-weight:600;letter-spacing:-.03em;line-height:1.15}
 @media (max-width:560px){.kpis div{padding:12px 14px}.kpis div b{font-size:22px}}
 
@@ -124,7 +126,7 @@ button.row:hover{background:var(--sub)}
 .rhead{display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-top:4px}
 .rhead .lead{margin:0}
 .rhead .sub{flex-basis:100%;margin:0}
-.badges{display:flex;gap:8px;flex-wrap:wrap;margin-left:auto}
+.badges{display:flex;gap:8px;flex-wrap:wrap;margin-left:auto;align-items:center;align-self:center}
 .badge{font-size:12px;border:1px solid var(--line);border-radius:999px;padding:3px 10px;white-space:nowrap}
 .sum{display:grid;gap:20px}
 @media (min-width:800px){.sum{grid-template-columns:repeat(3,minmax(0,1fr))}}
@@ -140,7 +142,9 @@ button.row:hover{background:var(--sub)}
 .drawer h2{font-size:20px;letter-spacing:-.02em}
 .drawer h3{font-size:12px;font-weight:400;color:var(--mute);margin:12px 0 4px}
 .drawer textarea{flex:1;min-height:220px;font:inherit;color:inherit;background:var(--field);border:1px solid var(--line);border-radius:8px;padding:12px;line-height:1.5;resize:none}
-.drawer .bar{display:flex;gap:8px;align-items:center;margin-top:auto;padding-top:12px}
+.fld{display:grid;gap:4px}
+.fld input{font:inherit;font-size:14px;color:var(--ink);background:var(--field);border:1px solid var(--line);border-radius:8px;height:36px;padding:0 10px;width:100%}
+.drawer .bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:auto;padding-top:12px}
 .toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);background:var(--ink);color:var(--bg);padding:10px 14px;border-radius:8px;font-size:13px;opacity:0;transition:opacity .2s,transform .2s;z-index:30;display:flex;gap:14px;align-items:center;max-width:calc(100% - 32px);pointer-events:none}
 .toast.on{opacity:1;transform:translate(-50%,0);pointer-events:auto}
 .toast button{text-decoration:underline;text-underline-offset:3px}
@@ -167,7 +171,7 @@ button.row:hover{background:var(--sub)}
 
   <section id="v-today">
     <h1 class="lead" id="todayLead"></h1>
-    <div class="kpis" id="todayKpis"></div>
+    <div class="kpis k4" id="todayKpis"></div>
     <div class="block">
       <h2>The day at a glance</h2>
       <p class="small sec-note">Each bar is a visit. A dot marks a record alert. Select a bar for the record.</p>
@@ -260,6 +264,7 @@ button.row:hover{background:var(--sub)}
     <div class="rhead">
       <h1 class="lead" id="fullName"></h1>
       <div class="badges" id="fullBadges"></div>
+      <button class="act" data-owner="full">Message owner</button>
       <p class="small sub" id="fullSub"></p>
     </div>
     <div class="block"><div class="sum" id="fullSum"></div></div>
@@ -270,6 +275,11 @@ button.row:hover{background:var(--sub)}
         <div id="fullVisits"></div>
       </div>
       <aside class="stack">
+        <div>
+          <h2>From Saratoga Horse Rx</h2>
+          <p class="small sec-note">Examples. The vet decides what is offered, the prices are placeholders.</p>
+          <div id="fullShop"></div>
+        </div>
         <div>
           <h2>Preventive care</h2>
           <p class="small sec-note">Due after twelve months. The practice sets the intervals.</p>
@@ -289,13 +299,15 @@ button.row:hover{background:var(--sub)}
   <div><h2 id="recTitle"></h2><p class="small" id="recSub" style="margin:2px 0 0"></p></div>
   <div id="recBody"></div>
   <div><h3>History, last two years</h3><div class="chart" id="recChart"></div></div>
-  <div class="bar"><button class="act" data-full="1">Open the full record</button><button class="btn2" data-close="1">Close</button></div>
+  <div class="bar"><button class="act" data-full="1">Open the full record</button><button class="btn2" data-owner="1">Message owner</button><button class="btn2" data-close="1">Close</button></div>
 </aside>
 <aside class="drawer" id="msgDrawer" aria-label="Draft message" aria-hidden="true">
   <div><h2 id="msgTitle"></h2><p class="small" id="msgSub" style="margin:2px 0 0"></p></div>
+  <label class="fld small">To<input id="msgTo" type="email" autocomplete="off"></label>
+  <label class="fld small">Subject<input id="msgSubject" type="text"></label>
   <textarea id="msgText" aria-label="Message"></textarea>
-  <div class="bar"><button class="act" id="msgSend">Mark as sent</button><button class="btn2" data-close="1">Close</button></div>
-  <p class="small" style="margin:0">The demo sends nothing. In the real tool this goes out from the practice's own address after you press the button.</p>
+  <div class="bar"><button class="act" id="msgMail">Open in mail app</button><button class="btn2" id="msgSend">Mark as sent</button><button class="btn2" data-close="1">Close</button></div>
+  <p class="small" style="margin:0">Opens your own mail program with this draft, ready to send. The address is a demo address, so change it before you send.</p>
 </aside>
 <div class="tip" id="tip" role="tooltip"></div>
 <div class="toast" id="toast" role="status"><span id="toastMsg"></span><button id="toastUndo" hidden>Undo</button></div>
@@ -342,6 +354,21 @@ var TODAY = [
     rec: ["Routine care only.", "Moved to this barn in the summer.", "Nothing outstanding."], al: [], add: [],
     hist: [[13, "Vaccination"], [7, "Dental exam"]] }
 ];
+/* horse -> [product, why it fits, example price]. Examples only: the vet decides what is offered. */
+var SHOP = {
+  Marlowe: [["Cold therapy wraps, pair", "Tendon rehab: icing after each exercise session", 85]],
+  Sable: [["Slow-feed hay net", "Managed diet since the colic surgery", 40]],
+  Clementine: [["Electrolyte paste, 6 doses", "Racing again in three weeks", 48]],
+  Birch: [["Senior feed balancer, 30 days", "22 years old, weight down for two visits", 55]],
+  Rook: [["Joint supplement, 60 days", "Back in work after carpal arthroscopy", 95]],
+  Fennel: [["Bandage kit", "Two more bandage changes before the sutures come out", 35]]
+};
+function shopFor(v) { return SHOP[v.h] || []; }
+function visitValue() { return Math.max(0, parseFloat($("visitValue").value) || 0); }
+/* due care at the assumed visit value, plus the pharmacy examples */
+function extraToday() {
+  return TODAY.reduce(function (a, v) { return a + v.add.length * visitValue() + shopFor(v).reduce(function (x, p) { return x + p[2]; }, 0); }, 0);
+}
 var RECALL = [
   ["Tamarack", "Joan Petrie", 31, "Vaccination, dental exam, Coggins"], ["Otis", "Luis Carrera", 27, "Vaccination, dental exam"],
   ["Wren", "Hannah Doyle", 24, "Dental exam, fecal egg count"], ["Bramble", "Greg Tanaka", 22, "Vaccination, Coggins"],
@@ -424,7 +451,8 @@ function renderToday() {
   $("todayKpis").innerHTML =
     '<div><b class="num">' + (TODAY.length - road) + '</b><span class="small">at the hospital</span></div>' +
     '<div><b class="num">' + road + '</b><span class="small">on the road</span></div>' +
-    '<div><b class="num">' + adds + '</b><span class="small">with care that is due</span></div>';
+    '<div><b class="num">' + adds + '</b><span class="small">with care that is due</span></div>' +
+    '<div><b class="num">' + money(extraToday()) + '</b><span class="small">possible extra today</span></div>';
   drawDay();
   var list = todayAll ? TODAY : TODAY.slice(0, SHOW);
   $("todayRows").innerHTML = list.map(function (v, i) {
@@ -439,6 +467,10 @@ function renderToday() {
 }
 $("todayMore").addEventListener("click", function () { todayAll = !todayAll; renderToday(); });
 
+function shopList(v) {
+  var sh = shopFor(v);
+  return sh.length ? "<table>" + sh.map(function (p) { return "<tr><td>" + esc(p[0]) + '<br><span class="small">' + esc(p[1]) + '</span></td><td class="nw num" style="text-align:right;padding-right:0">' + money(p[2]) + "</td></tr>"; }).join("") + "</table>" : '<p class="small" style="margin:0">Nothing suggested for this horse.</p>';
+}
 /* the record: three lines, what to know, what is due, and the history as a line of events */
 function openRecord(i) {
   recAt = i;
@@ -447,7 +479,8 @@ function openRecord(i) {
   $("recSub").textContent = v.d + " · " + v.o + " · " + v.t + ", " + v.why;
   $("recBody").innerHTML = "<h3>The record in three lines</h3>" + ul(v.rec) +
     (v.al.length ? "<h3>Know before you walk in</h3>" + ul(v.al, "alert") : "") +
-    (v.add.length ? "<h3>Worth mentioning, because it is due</h3>" + ul(v.add, "due") : "");
+    (v.add.length ? "<h3>Worth mentioning, because it is due</h3>" + ul(v.add, "due") : "") +
+    (shopFor(v).length ? "<h3>From the pharmacy, as an example</h3>" + shopList(v) : "");
   openDrawer("recDrawer");
   var ev = v.hist.slice().sort(function (a, b) { return b[0] - a[0]; });
   svg($("recChart"), 44 + ev.length * 26, function (w) {
@@ -503,6 +536,7 @@ function renderRecord() {
   $("fullSum").innerHTML = "<div><h3>The record in three lines</h3>" + ul(v.rec) + "</div>" +
     "<div><h3>Know before you walk in</h3>" + ul(v.al, "alert") + "</div>" +
     "<div><h3>Worth mentioning, because it is due</h3>" + ul(v.add, "due") + "</div>";
+  $("fullShop").innerHTML = shopList(v);
   var ev = v.hist.slice().sort(function (a, b) { return a[0] - b[0]; });
   $("fullVisits").innerHTML = "<table><tr><th>When</th><th>What</th><th>Note</th></tr>" +
     '<tr><td class="nw num">Today</td><td>' + esc(v.why) + '</td><td class="small">Booked for ' + v.t + ".</td></tr>" +
@@ -662,21 +696,46 @@ function renderRecall() {
   var bins = [["12 to 14 months", 12, 14], ["15 to 18 months", 15, 18], ["19 to 24 months", 19, 24], ["Over two years", 25, 999]];
   if (!$("v-recall").hidden) hbars($("gapChart"), bins.map(function (b) { return [b[0], open.filter(function (r) { return r.m >= b[1] && r.m <= b[2]; }).length]; }), "horses");
 }
-function draft(i) {
-  cur = RECALL[i];
-  $("msgTitle").textContent = "Message to " + cur.o;
-  $("msgSub").textContent = cur.h + " · last seen " + cur.m + " months ago";
-  $("msgText").value = "Hello " + cur.o.split(" ")[0] + ",\n\nit has been a while since we last saw " + cur.h +
-    ". Our records show the following is due: " + cur.due.charAt(0).toLowerCase() + cur.due.slice(1) +
-    ".\n\nIf you would like us to come out or to bring " + cur.h + " in, call the office on 518-584-1633 and we will find a time that suits you.\n\nEquine Clinic of Saratoga";
+var SIGN = "\n\nIf you have questions, call the office on 518-584-1633.\n\nEquine Clinic of Saratoga";
+function compose(owner, sub, subject, body, onSent, onUndo) {
+  cur = { o: owner, onSent: onSent, onUndo: onUndo };
+  $("msgTitle").textContent = "Message to " + owner;
+  $("msgSub").textContent = sub;
+  $("msgTo").value = owner.toLowerCase().replace(/[^a-z ]/g, "").trim().replace(/ +/g, ".") + "@example.com";
+  $("msgSubject").value = subject;
+  $("msgText").value = body;
   openDrawer("msgDrawer"); $("msgText").focus();
+}
+/* an overdue horse: a reminder */
+function draft(i) {
+  var r = RECALL[i];
+  compose(r.o, r.h + " · last seen " + r.m + " months ago", r.h + ": time for a check-up",
+    "Hello " + r.o.split(" ")[0] + ",\n\nit has been a while since we last saw " + r.h +
+    ". Our records show the following is due: " + r.due.charAt(0).toLowerCase() + r.due.slice(1) +
+    ".\n\nIf you would like us to come out or to bring " + r.h + " in, we will find a time that suits you." + SIGN,
+    function () { r.sent = true; renderRecall(); }, function () { r.sent = false; renderRecall(); });
+}
+/* a horse seen today: what is due and what the pharmacy can add */
+function draftOwner(i) {
+  var v = TODAY[i], sh = shopFor(v), body = "Hello " + v.o.split(" ")[0] + ",\n\nthank you for having us see " + v.h + " today.";
+  if (v.add.length) body += "\n\nWhile we had the record open we noticed:\n" + v.add.map(function (x) { return "- " + x; }).join("\n") + "\nWe can do this at the next visit, or sooner if you prefer.";
+  if (sh.length) body += "\n\nFrom our pharmacy, Saratoga Horse Rx, this may help:\n" + sh.map(function (p) { return "- " + p[0] + " (" + money(p[2]) + "): " + p[1].charAt(0).toLowerCase() + p[1].slice(1); }).join("\n") + "\nReply to this message and we will put it on the truck.";
+  if (!v.add.length && !sh.length) body += "\n\nNothing is outstanding. We will be in touch when the next routine visit is due.";
+  compose(v.o, v.h + " · seen today", v.h + ": after today's visit", body + SIGN, null, null);
 }
 function openDrawer(id) { closeDrawers(); $(id).classList.add("open"); $(id).setAttribute("aria-hidden", "false"); }
 function closeDrawers() { ["recDrawer", "msgDrawer"].forEach(function (id) { $(id).classList.remove("open"); $(id).setAttribute("aria-hidden", "true"); }); }
-$("msgSend").addEventListener("click", function () {
-  var r = cur; if (!r) return;
-  r.sent = true; closeDrawers(); renderRecall();
-  toast("Marked as sent to " + r.o + ". Nothing left the demo.", function () { r.sent = false; renderRecall(); });
+function markSent(how) {
+  var c = cur; if (!c) return;
+  if (c.onSent) c.onSent();
+  closeDrawers();
+  toast(how + " " + c.o + ".", c.onUndo);
+}
+$("msgSend").addEventListener("click", function () { markSent("Marked as sent to"); });
+$("msgMail").addEventListener("click", function () {
+  var url = "mailto:" + encodeURIComponent($("msgTo").value.trim()) + "?subject=" + encodeURIComponent($("msgSubject").value) + "&body=" + encodeURIComponent($("msgText").value);
+  window.location.href = url;
+  markSent("Draft handed to your mail app for");
 });
 $("recallMore").addEventListener("click", function () { recallAll = !recallAll; renderRecall(); });
 $("visitValue").addEventListener("input", renderRecall);
@@ -686,6 +745,7 @@ function act(e) {
   var t = e.target;
   if (t.closest("[data-full]")) { closeDrawers(); full = recAt; show("record"); return true; }
   if (t.closest("[data-close]")) { closeDrawers(); return true; }
+  var ow = t.closest("[data-owner]"); if (ow) { draftOwner(ow.getAttribute("data-owner") === "full" ? full : recAt); return true; }
   var d = t.closest("[data-draft]"); if (d) { draft(+d.getAttribute("data-draft")); return true; }
   var r = t.closest("[data-rec]"); if (r) { openRecord(+r.getAttribute("data-rec")); return true; }
   var g = t.closest("[data-go]"); if (g) { show(g.getAttribute("data-go")); return true; }
@@ -715,7 +775,7 @@ document.addEventListener("focusin", function (e) {
 /* ---------- views ---------- */
 var RENDER = { today: renderToday, week: renderWeek, month: renderMonth, recall: renderRecall, record: renderRecord }, view = "today";
 function show(v) {
-  view = v;
+  view = v; closeDrawers();
   Object.keys(RENDER).forEach(function (k) { $("v-" + k).hidden = k !== v; });
   [].forEach.call(document.querySelectorAll(".views button"), function (b) { b.setAttribute("aria-selected", b.getAttribute("data-view") === v ? "true" : "false"); });
   RENDER[v]();                   /* charts are drawn at the visible width */

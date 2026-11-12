@@ -339,21 +339,25 @@ function buildPathway() {
   }).join("");
   renderMedia(med);
   pathwayScroll = makeWalk([].slice.call(txt.children), [].slice.call(med.querySelectorAll(".lay")),
-    document.getElementById("walkN"), document.getElementById("walkFill"), 0.55);
+    document.getElementById("walkN"), document.getElementById("walkFill"), 0.55, null, true);
 }
 /* A walk: text steps in the page flow, one picture box that stays in view.
    The step level with the reading line owns the picture. Between two steps the
    outgoing layer grows and fades while the next one waits underneath, so
    scrolling reads as moving through the picture into the next room.
    On a phone the picture sits at the top, so the reading line is lower down. */
-function makeWalk(steps, lays, nEl, fillEl, zoom, onChange) {
-  var cur = -1, n = steps.length;
+function makeWalk(steps, lays, nEl, fillEl, zoom, onChange, fly) {
+  var cur = -1, n = steps.length, DEPTH = 2.3;
   var two = function (i) { return String(i).padStart(2, "0"); };
   function set(i) {
     if (i === cur) return;
     cur = i;
     steps.forEach(function (e, j) { e.classList.toggle("on", j === i); });
     lays.forEach(function (e, j) { e.classList.toggle("on", j === i); });
+    /* fetch the next two pictures now, so the flight never lands on an empty frame */
+    [i + 1, i + 2].forEach(function (k) {
+      if (lays[k]) [].forEach.call(lays[k].querySelectorAll("img"), function (im) { im.loading = "eager"; });
+    });
     if (nEl) nEl.textContent = two(i + 1) + " / " + two(n);
     if (onChange) onChange(i);
   }
@@ -374,9 +378,21 @@ function makeWalk(steps, lays, nEl, fillEl, zoom, onChange) {
       var at = Math.floor(pos), f = pos - at;
       var t = f <= 0.5 ? 0 : (f - 0.5) / 0.5;
       t = t * t * (3 - 2 * t);
+      /* fly: a camera travelling down a line of pictures hung one behind the other.
+         A picture at distance d appears at size 1 / (1 + d), which is plain
+         perspective. The camera rests in front of each picture while its text is
+         read, then travels through it; the next one grows out of the distance. */
+      var e = f <= 0.22 ? 0 : (f - 0.22) / 0.78;
+      e = e * e * (3 - 2 * e);
       lays.forEach(function (l, j) {
         var o = 0, sc = 1, z = 0;
-        if (j === at) { o = 1 - t; sc = 1 + zoom * t; z = 2; }
+        if (fly) {
+          var d = (j - at - e) * DEPTH;
+          if (j === at && e < 0.4) { o = 1 - e / 0.4; sc = 1 / (1 + d); z = 2; }
+          else if (j === at + 1 && e > 0) { o = Math.min(1, e / 0.25); sc = 1 / (1 + d); z = 1; }
+          else if (j === at && e === 0) { o = 1; z = 2; }
+        }
+        else if (j === at) { o = 1 - t; sc = 1 + zoom * t; z = 2; }
         else if (j === at + 1 && t > 0) { o = 1; sc = 1 - 0.05 * (1 - t); z = 1; }
         l.style.opacity = o.toFixed(3);
         l.style.transform = "scale(" + sc.toFixed(4) + ")";
