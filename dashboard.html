@@ -9,54 +9,66 @@
 <link rel="preload" as="font" type="font/woff2" href="assets/fonts/inter-tight.woff2" crossorigin>
 <style>
 /* A demo of an internal steering view. Every horse, owner, record and figure on
-   this page is invented. Nothing is stored and nothing is sent. */
+   this page is invented. Nothing is stored and nothing is sent.
+   Look: black on white, one level of thin-bordered containers with rows inside. */
 @font-face{font-family:"Inter Tight";font-weight:400 600;font-display:swap;src:url("assets/fonts/inter-tight.woff2") format("woff2")}
 @font-face{font-family:"IBM Plex Mono";font-weight:400;font-display:swap;src:url("assets/fonts/plex-mono-400.woff2") format("woff2")}
 :root{
   color-scheme:light;
-  --bg:#F6F5F1; --ink:#10130F; --mute:#6B6F66; --line:rgba(16,19,15,.12); --field:rgba(16,19,15,.05);
-  --signal:#D2542A; --ok:#1E6E5E; --warn:#B7791F;
+  --bg:#fff; --sub:#fafafa; --ink:#0a0a0a; --mute:#666; --line:#eaeaea; --field:#fff;
+  --signal:#e5484d; --ok:#17794a; --warn:#b76e00;
   /* chart series, fixed order: 1 hospital, 2 on the road, then the revenue parts */
   --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s4:#eda100; --s5:#e87ba4;
   --f:"Inter Tight",-apple-system,"Segoe UI",sans-serif; --m:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  --r:12px;
 }
 @media (prefers-color-scheme:dark){:root{
   color-scheme:dark;
-  --bg:#141714; --ink:#F1F0EA; --mute:#A3A79D; --line:rgba(246,245,241,.16); --field:rgba(246,245,241,.07);
-  --signal:#E8703F; --ok:#5FC0A0; --warn:#E0A84A;
+  --bg:#0a0a0a; --sub:#111; --ink:#ededed; --mute:#a1a1a1; --line:#2a2a2a; --field:#0a0a0a;
+  --signal:#ff6369; --ok:#4cc38a; --warn:#f1a10d;
   --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181;
 }}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
 button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
-:focus-visible{outline:2px solid var(--signal);outline-offset:3px;border-radius:3px}
-.wrap{max-width:1240px;margin-inline:auto;padding-inline:clamp(16px,4vw,48px)}
+:focus-visible{outline:2px solid var(--ink);outline-offset:2px;border-radius:4px}
+.wrap{max-width:1200px;margin-inline:auto;padding-inline:clamp(16px,3vw,24px)}
 .small{font-size:13px;color:var(--mute)}
 .num{font-family:var(--m);font-variant-numeric:tabular-nums}
 
-.top{display:flex;align-items:center;gap:16px;padding-block:16px;border-bottom:1px solid var(--line);flex-wrap:wrap}
-.top b{font-weight:600;letter-spacing:-.02em}
-.views{display:flex;gap:4px;margin-left:auto}
-.views button{padding:9px 16px;border-radius:999px;font-size:14px;color:var(--mute);min-height:40px}
-.views button[aria-selected="true"]{background:var(--ink);color:var(--bg)}
-.views button:active,.act:active,.link:active{transform:scale(.97)}
-.demo{padding-block:10px;border-bottom:1px solid var(--line);margin:0}
-.demo i{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--signal);margin-right:8px;vertical-align:1px}
+/* header: name, then tabs with an underline for the current one */
+.head{border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--bg);z-index:10}
+.top{display:flex;align-items:center;gap:10px;padding-block:14px 6px;flex-wrap:wrap}
+.top b{font-weight:600;letter-spacing:-.01em}
+.top .sl{color:var(--line)}
+.tag{margin-left:auto;font-size:12px;color:var(--mute);border:1px solid var(--line);border-radius:999px;padding:2px 10px}
+.tag i{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--warn);margin-right:6px;vertical-align:1px}
+.views{display:flex;gap:4px;margin-left:-10px}
+.views button{padding:0 10px;height:40px;color:var(--mute);position:relative}
+.views button:hover{color:var(--ink)}
+.views button[aria-selected="true"]{color:var(--ink)}
+.views button[aria-selected="true"]::after{content:"";position:absolute;left:10px;right:10px;bottom:-1px;height:2px;background:var(--ink)}
 
-.lead{font-size:clamp(26px,3.6vw,44px);font-weight:500;letter-spacing:-.03em;line-height:1.08;margin:clamp(28px,5vw,56px) 0 0;max-width:26ch;text-wrap:balance}
-.kpis{display:flex;gap:clamp(24px,5vw,64px);margin-top:28px;flex-wrap:wrap}
-.kpis div b{display:block;font-size:34px;font-weight:500;letter-spacing:-.03em;line-height:1.1}
-.block{margin-top:48px}
-.cols{display:grid;grid-template-columns:minmax(0,1fr);gap:48px;margin-block:48px 72px}
-.two > div + div{margin-top:48px}
-@media (min-width:1100px){
-  .cols{grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);gap:72px}
-  .two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:72px}
-  .two > div + div{margin-top:0}
+.lead{font-size:clamp(22px,2.6vw,30px);font-weight:600;letter-spacing:-.03em;line-height:1.15;margin:32px 0 0;max-width:34ch;text-wrap:balance}
+/* key figures: one container, cells divided by lines */
+.kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border:1px solid var(--line);border-radius:var(--r);margin-top:24px;overflow:hidden}
+.kpis div{padding:16px 20px;display:flex;flex-direction:column-reverse;gap:2px}
+.kpis div + div{border-left:1px solid var(--line)}
+.kpis div b{font-size:28px;font-weight:600;letter-spacing:-.03em;line-height:1.15}
+@media (max-width:560px){.kpis div{padding:12px 14px}.kpis div b{font-size:22px}}
+
+/* containers: a thin border, a title row, content. Never one inside another. */
+.block,.cols > *,.two > *{border:1px solid var(--line);border-radius:var(--r);padding:20px;background:var(--bg);min-width:0}
+.block{margin-top:16px}
+.two.block{border:0;padding:0;border-radius:0}
+.cols,.two{display:grid;grid-template-columns:minmax(0,1fr);gap:16px;margin-top:16px}
+.end,.cols{margin-bottom:64px}
+@media (min-width:1000px){
+  .cols{grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);align-items:start}
+  .two{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
 }
-h2{font-size:16px;font-weight:500;margin:0 0 4px}
-.sec-note{margin:0 0 14px}
-.end{margin-bottom:72px}
+h2{font-size:14px;font-weight:600;margin:0}
+.sec-note{margin:2px 0 16px}
 
 /* charts */
 .chart{position:relative;width:100%}
@@ -67,47 +79,69 @@ h2{font-size:16px;font-weight:500;margin:0 0 4px}
 .chart .grid{stroke:var(--line);stroke-width:1}
 .chart .hit{cursor:pointer}
 .chart .hit:hover,.chart .hit:focus{opacity:.78;outline:none}
-.legend{display:flex;gap:18px;flex-wrap:wrap;margin-top:10px}
-.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:7px;vertical-align:-1px}
-.tip{position:fixed;z-index:40;pointer-events:none;background:var(--ink);color:var(--bg);font-size:13px;line-height:1.4;padding:8px 12px;border-radius:8px;max-width:260px;opacity:0;transition:opacity .12s;left:0;top:0}
+.legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:12px}
+.legend i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:6px;vertical-align:0}
+.tip{position:fixed;z-index:40;pointer-events:none;background:var(--ink);color:var(--bg);font-size:12px;line-height:1.4;padding:6px 10px;border-radius:6px;max-width:260px;opacity:0;transition:opacity .12s;left:0;top:0}
 .tip.on{opacity:1}
 details.tbl{margin-top:12px}
 details.tbl summary{cursor:pointer;font-size:13px;color:var(--mute);min-height:32px}
-details.tbl table{border-collapse:collapse;margin-top:8px;font-size:13px}
-details.tbl td,details.tbl th{padding:6px 18px 6px 0;text-align:left;font-weight:400;border-bottom:1px solid var(--line)}
-details.tbl th{color:var(--mute)}
 
-/* rows */
-.rows{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
-.rows > li{border-bottom:1px solid var(--line)}
-.row{display:grid;grid-template-columns:56px minmax(0,1fr) auto;gap:16px;align-items:center;width:100%;text-align:left;padding:14px 0;min-height:48px}
+/* tables and rows share one look: lines between, none around */
+table{border-collapse:collapse;width:100%;font-size:13px}
+th{color:var(--mute);font-weight:400;text-align:left;padding:8px 16px 8px 0;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:10px 16px 10px 0;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:0}
+td.nw{white-space:nowrap}
+.rows{list-style:none;margin:0 -20px -20px;padding:0;border-top:1px solid var(--line)}
+.rows > li + li{border-top:1px solid var(--line)}
+.row{display:grid;grid-template-columns:48px minmax(0,1fr) auto;gap:14px;align-items:center;width:100%;text-align:left;padding:12px 20px;min-height:48px}
+button.row:hover{background:var(--sub)}
 .row.two-col{grid-template-columns:minmax(0,1fr) auto}
 .row .who b{font-weight:500}
-.row .flag{font-size:13px;color:var(--mute);white-space:nowrap}
+.row .flag{font-size:12px;color:var(--mute);white-space:nowrap}
 .dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:7px;vertical-align:1px;background:var(--mute)}
 .dot.alert{background:var(--signal)} .dot.due{background:var(--warn)} .dot.ok{background:var(--ok)}
-button.row:hover .who b{text-decoration:underline;text-underline-offset:3px}
-@media (max-width:640px){.row{grid-template-columns:48px minmax(0,1fr)}.row.two-col{grid-template-columns:minmax(0,1fr) auto}.row .flag{grid-column:2;margin-top:-8px}}
-.more{margin-top:12px}
-.link{font-size:14px;text-decoration:underline;text-underline-offset:3px;min-height:40px}
-.act{display:inline-flex;align-items:center;min-height:40px;padding:0 18px;border-radius:999px;background:var(--ink);color:var(--bg);font-size:14px}
+@media (max-width:640px){.row{grid-template-columns:44px minmax(0,1fr)}.row.two-col{grid-template-columns:minmax(0,1fr) auto}.row .flag{grid-column:2;margin-top:-8px}}
+.more{margin:0 -20px -20px;padding:4px 20px;border-top:1px solid var(--line)}
+.rows + .more{margin-top:20px}
+.link{font-size:13px;color:var(--mute);min-height:40px}
+.link:hover{color:var(--ink)}
+.act,.btn2{display:inline-flex;align-items:center;height:36px;padding:0 14px;border-radius:8px;font-size:13px;font-weight:500;white-space:nowrap}
+.act{background:var(--ink);color:var(--bg)}
+.act:hover{opacity:.86}
+.btn2{border:1px solid var(--line)}
+.btn2:hover{background:var(--sub)}
+.act:active,.btn2:active{transform:scale(.98)}
 .done{color:var(--ok)}
 
-.assume{display:flex;align-items:center;gap:10px;margin-top:18px;flex-wrap:wrap}
-.assume input{width:92px;font:inherit;font-family:var(--m);color:inherit;background:var(--field);border:1px solid var(--line);border-radius:8px;padding:8px 10px;min-height:40px}
-.meter{height:6px;border-radius:3px;background:var(--line);overflow:hidden;margin-top:10px;max-width:420px}
-.meter i{display:block;height:100%;background:var(--ok);border-radius:3px;transition:width .3s}
+.assume{display:flex;align-items:center;gap:10px;margin-top:16px;flex-wrap:wrap}
+.assume input{width:88px;font:inherit;font-family:var(--m);color:inherit;background:var(--field);border:1px solid var(--line);border-radius:8px;padding:0 10px;height:36px}
+.meter{height:4px;border-radius:2px;background:var(--line);overflow:hidden;margin-top:14px}
+.meter i{display:block;height:100%;background:var(--ink);transition:width .3s}
 
-/* drawers: the one surface, because you read or type in it */
-.drawer{position:fixed;inset:0 0 0 auto;width:min(500px,100%);background:var(--bg);border-left:1px solid var(--line);padding:24px clamp(16px,4vw,32px);display:flex;flex-direction:column;gap:14px;z-index:20;transform:translateX(100%);transition:transform .28s cubic-bezier(.16,1,.3,1);visibility:hidden;overflow-y:auto}
+/* the full record */
+.back{display:inline-flex;align-items:center;gap:6px;margin-top:24px;min-height:36px}
+.rhead{display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-top:4px}
+.rhead .lead{margin:0}
+.rhead .sub{flex-basis:100%;margin:0}
+.badges{display:flex;gap:8px;flex-wrap:wrap;margin-left:auto}
+.badge{font-size:12px;border:1px solid var(--line);border-radius:999px;padding:3px 10px;white-space:nowrap}
+.sum{display:grid;gap:20px}
+@media (min-width:800px){.sum{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.sum h3{font-size:12px;font-weight:400;color:var(--mute);margin:0 0 6px}
+.sum ul,.drawer ul{margin:0;padding:0;list-style:none}
+.sum li,.drawer li{padding:2px 0}
+.stack{display:grid;gap:16px;border:0!important;padding:0!important;border-radius:0!important}
+.stack > div{border:1px solid var(--line);border-radius:var(--r);padding:20px;min-width:0}
+
+/* drawers */
+.drawer{position:fixed;inset:0 0 0 auto;width:min(480px,100%);background:var(--bg);border-left:1px solid var(--line);padding:20px;display:flex;flex-direction:column;gap:12px;z-index:20;transform:translateX(100%);transition:transform .26s cubic-bezier(.16,1,.3,1);visibility:hidden;overflow-y:auto}
 .drawer.open{transform:none;visibility:visible}
-.drawer h2{font-size:22px;letter-spacing:-.02em}
-.drawer h3{font-size:13px;font-weight:400;color:var(--mute);margin:10px 0 4px}
-.drawer ul{margin:0;padding:0;list-style:none}
-.drawer li{padding:2px 0}
-.drawer textarea{flex:1;min-height:220px;font:inherit;color:inherit;background:var(--field);border:1px solid var(--line);border-radius:10px;padding:14px;line-height:1.5;resize:none}
-.drawer .bar{display:flex;gap:16px;align-items:center;margin-top:auto;padding-top:12px}
-.toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);background:var(--ink);color:var(--bg);padding:12px 18px;border-radius:999px;font-size:14px;opacity:0;transition:opacity .2s,transform .2s;z-index:30;display:flex;gap:14px;align-items:center;max-width:calc(100% - 32px);pointer-events:none}
+.drawer h2{font-size:20px;letter-spacing:-.02em}
+.drawer h3{font-size:12px;font-weight:400;color:var(--mute);margin:12px 0 4px}
+.drawer textarea{flex:1;min-height:220px;font:inherit;color:inherit;background:var(--field);border:1px solid var(--line);border-radius:8px;padding:12px;line-height:1.5;resize:none}
+.drawer .bar{display:flex;gap:8px;align-items:center;margin-top:auto;padding-top:12px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);background:var(--ink);color:var(--bg);padding:10px 14px;border-radius:8px;font-size:13px;opacity:0;transition:opacity .2s,transform .2s;z-index:30;display:flex;gap:14px;align-items:center;max-width:calc(100% - 32px);pointer-events:none}
 .toast.on{opacity:1;transform:translate(-50%,0);pointer-events:auto}
 .toast button{text-decoration:underline;text-underline-offset:3px}
 [hidden]{display:none!important}
@@ -116,18 +150,18 @@ button.row:hover .who b{text-decoration:underline;text-underline-offset:3px}
 </head>
 <body>
 
-<div class="wrap">
+<div class="head"><div class="wrap">
   <header class="top">
-    <b>Equine Clinic of Saratoga</b><span class="small">Steering</span>
-    <div class="views" role="tablist" aria-label="View">
-      <button role="tab" aria-selected="true" data-view="today">Today</button>
-      <button role="tab" aria-selected="false" data-view="week">Week</button>
-      <button role="tab" aria-selected="false" data-view="month">Month</button>
-      <button role="tab" aria-selected="false" data-view="recall">Recall</button>
-    </div>
+    <b>Equine Clinic of Saratoga</b><span class="sl">/</span><span>Steering</span>
+    <span class="tag"><i></i>Demo, invented data</span>
   </header>
-  <p class="small demo"><i></i>Demo. Every horse, owner, record and figure here is invented. Nothing is stored or sent.</p>
-</div>
+  <div class="views" role="tablist" aria-label="View">
+    <button role="tab" aria-selected="true" data-view="today">Today</button>
+    <button role="tab" aria-selected="false" data-view="week">Week</button>
+    <button role="tab" aria-selected="false" data-view="month">Month</button>
+    <button role="tab" aria-selected="false" data-view="recall">Recall</button>
+  </div>
+</div></div>
 
 <main class="wrap">
 
@@ -220,18 +254,47 @@ button.row:hover .who b{text-decoration:underline;text-underline-offset:3px}
       </aside>
     </div>
   </section>
+
+  <section id="v-record" hidden>
+    <button class="link back" data-go="today">&larr; Back to today</button>
+    <div class="rhead">
+      <h1 class="lead" id="fullName"></h1>
+      <div class="badges" id="fullBadges"></div>
+      <p class="small sub" id="fullSub"></p>
+    </div>
+    <div class="block"><div class="sum" id="fullSum"></div></div>
+    <div class="cols">
+      <div>
+        <h2>Visits</h2>
+        <p class="small sec-note">Newest first, last two years.</p>
+        <div id="fullVisits"></div>
+      </div>
+      <aside class="stack">
+        <div>
+          <h2>Preventive care</h2>
+          <p class="small sec-note">Due after twelve months. The practice sets the intervals.</p>
+          <div id="fullCare"></div>
+        </div>
+        <div>
+          <h2>Weight</h2>
+          <p class="small sec-note" id="fullWeightNote"></p>
+          <div class="chart" id="fullWeight"></div>
+        </div>
+      </aside>
+    </div>
+  </section>
 </main>
 
 <aside class="drawer" id="recDrawer" aria-label="Record" aria-hidden="true">
   <div><h2 id="recTitle"></h2><p class="small" id="recSub" style="margin:2px 0 0"></p></div>
   <div id="recBody"></div>
   <div><h3>History, last two years</h3><div class="chart" id="recChart"></div></div>
-  <div class="bar"><button class="act" data-full="1">Open the full record</button><button class="link" data-close="1">Close</button></div>
+  <div class="bar"><button class="act" data-full="1">Open the full record</button><button class="btn2" data-close="1">Close</button></div>
 </aside>
 <aside class="drawer" id="msgDrawer" aria-label="Draft message" aria-hidden="true">
   <div><h2 id="msgTitle"></h2><p class="small" id="msgSub" style="margin:2px 0 0"></p></div>
   <textarea id="msgText" aria-label="Message"></textarea>
-  <div class="bar"><button class="act" id="msgSend">Mark as sent</button><button class="link" data-close="1">Close</button></div>
+  <div class="bar"><button class="act" id="msgSend">Mark as sent</button><button class="btn2" data-close="1">Close</button></div>
   <p class="small" style="margin:0">The demo sends nothing. In the real tool this goes out from the practice's own address after you press the button.</p>
 </aside>
 <div class="tip" id="tip" role="tooltip"></div>
@@ -378,6 +441,7 @@ $("todayMore").addEventListener("click", function () { todayAll = !todayAll; ren
 
 /* the record: three lines, what to know, what is due, and the history as a line of events */
 function openRecord(i) {
+  recAt = i;
   var v = TODAY[i], ul = function (a, cls) { return "<ul>" + a.map(function (x) { return "<li>" + (cls ? '<span class="dot ' + cls + '"></span>' : "") + esc(x) + "</li>"; }).join("") + "</ul>"; };
   $("recTitle").textContent = v.h;
   $("recSub").textContent = v.d + " · " + v.o + " · " + v.t + ", " + v.why;
@@ -398,6 +462,70 @@ function openRecord(i) {
         '<circle cx="' + cx + '" cy="14" r="5" fill="var(--s1)" stroke="var(--bg)" stroke-width="2"/>' +
         '<text class="v" x="' + (right ? cx - 8 : cx + 8) + '" y="' + y + '" text-anchor="' + (right ? "end" : "start") + '">' + esc(e[1]) + "</text>";
     });
+    return o;
+  });
+}
+
+/* ---------- the full record ---------- */
+var recAt = 0, full = 0;
+var NOTES = {
+  "Dental exam": "Routine float. No sharp points left, no loose teeth.",
+  "Vaccination": "Core vaccines given. No reaction reported.",
+  "Coggins": "Blood drawn, result negative.",
+  "Bloodwork": "Full panel. Values within the normal range.",
+  "Colic surgery": "Exploratory celiotomy. Recovered from anaesthesia without incident.",
+  "Post-operative re-check": "Incision healing well. Feed plan adjusted.",
+  "Ultrasound: suspensory injury": "Lesion in the left fore suspensory. Controlled exercise started.",
+  "Re-scan": "Lesion filling in. Exercise plan extended by four weeks.",
+  "Radiographs received from seller": "Set of 2025 films added to the file.",
+  "Referral received": "History and images sent ahead by the referring practice.",
+  "Radiographs, right hock": "Effusion confirmed. Arthroscopy discussed with the owner.",
+  "Airway endoscopy: normal": "No abnormality at rest.",
+  "Dental exam, weight down": "Routine float. Weight down against the spring visit.",
+  "Vaccination, weight down": "Core vaccines given. Weight down again, bloodwork advised.",
+  "Lameness work-up": "Blocks localised the pain to the left carpus.",
+  "Arthroscopy, left carpus": "Chip fragment removed. One night in hospital.",
+  "Suture removal": "Portals healed.",
+  "Back in light work": "Sound at the walk and trot in hand.",
+  "Laceration sutured": "Right hind, cleaned and closed. Bandage plan given."
+};
+var WEIGHTS = [[1085, 1090, 1080, 1088, 1084], [1210, 1214, 1208, 1212, 1215], [1150, 1128, 1140, 1146, 1149], [1290, 1286, 1294, 1288, 1291],
+  [982, 978, 985, 980, 984], [1010, 1005, 1000, 978, 961], [1120, 1124, 1118, 1110, 1116], [1060, 1064, 1058, 1062, 1061], [930, 934, 928, 932, 935]];
+var CARE = ["Vaccination", "Dental exam", "Coggins", "Fecal egg count", "Bloodwork"];
+function when(m) { var d = new Date(NOW.getTime() - m * 30.4 * 864e5); return MONTHS[d.getMonth()] + " " + d.getFullYear(); }
+function renderRecord() {
+  var v = TODAY[full], ul = function (a, cls) { return a.length ? "<ul>" + a.map(function (x) { return "<li>" + (cls ? '<span class="dot ' + cls + '"></span>' : "") + esc(x) + "</li>"; }).join("") + "</ul>" : '<p class="small" style="margin:0">Nothing.</p>'; };
+  $("fullName").textContent = v.h;
+  $("fullSub").textContent = v.d + " · " + v.o + " · today " + v.t + ", " + v.why + " · " + v.at;
+  $("fullBadges").innerHTML = (v.al.length ? '<span class="badge"><span class="dot alert"></span>' + plural(v.al.length, "alert", "alerts") + "</span>" : "") +
+    (v.add.length ? '<span class="badge"><span class="dot due"></span>Care due</span>' : "") +
+    (!v.al.length && !v.add.length ? '<span class="badge"><span class="dot ok"></span>Clear</span>' : "");
+  $("fullSum").innerHTML = "<div><h3>The record in three lines</h3>" + ul(v.rec) + "</div>" +
+    "<div><h3>Know before you walk in</h3>" + ul(v.al, "alert") + "</div>" +
+    "<div><h3>Worth mentioning, because it is due</h3>" + ul(v.add, "due") + "</div>";
+  var ev = v.hist.slice().sort(function (a, b) { return a[0] - b[0]; });
+  $("fullVisits").innerHTML = "<table><tr><th>When</th><th>What</th><th>Note</th></tr>" +
+    '<tr><td class="nw num">Today</td><td>' + esc(v.why) + '</td><td class="small">Booked for ' + v.t + ".</td></tr>" +
+    ev.map(function (e) { return '<tr><td class="nw num">' + when(e[0]) + "</td><td>" + esc(e[1]) + '</td><td class="small">' + esc(NOTES[e[1]] || "") + "</td></tr>"; }).join("") + "</table>";
+  $("fullCare").innerHTML = "<table>" + CARE.map(function (c) {
+    var hit = ev.filter(function (e) { return e[1].indexOf(c) === 0; })[0];
+    var st = !hit ? ["due", "Not on record"] : hit[0] > 12 ? ["alert", "Overdue"] : hit[0] >= 10 ? ["due", "Due soon"] : ["ok", "Up to date"];
+    return "<tr><td>" + c + '</td><td class="small nw">' + (hit ? when(hit[0]) : "") + '</td><td class="nw"><span class="dot ' + st[0] + '"></span>' + st[1] + "</td></tr>";
+  }).join("") + "</table>";
+  var ws = WEIGHTS[full], diff = ws[4] - ws[0];
+  $("fullWeightNote").textContent = Math.abs(diff) < 15 ? "Steady over two years, in pounds." : (diff < 0 ? "Down " : "Up ") + Math.abs(diff) + " pounds over two years.";
+  svg($("fullWeight"), 150, function (w) {
+    var L = 6, R = 44, top = 14, base = 112, lo = Math.min.apply(null, ws) - 20, hi = Math.max.apply(null, ws) + 20,
+        x = function (i) { return L + i / 4 * (w - L - R); }, y = function (n) { return base - (n - lo) / (hi - lo) * (base - top); }, o = "";
+    o += '<line class="grid" x1="0" x2="' + w + '" y1="' + base + '" y2="' + base + '"/>';
+    o += '<polyline fill="none" stroke="var(--s1)" stroke-width="2" stroke-linejoin="round" points="' + ws.map(function (n, i) { return x(i) + "," + y(n); }).join(" ") + '"/>';
+    ws.forEach(function (n, i) {
+      var m = 24 - i * 6;
+      o += '<g class="hit" tabindex="0" data-tip="' + (m ? when(m) : "Last visit") + ": " + n + ' lb"><circle cx="' + x(i) + '" cy="' + y(n) + '" r="' + (i === 4 ? 5 : 3.5) + '" fill="var(--s1)" stroke="var(--bg)" stroke-width="2"/>' +
+        '<rect x="' + (x(i) - 16) + '" y="0" width="32" height="' + base + '" fill="transparent"/></g>';
+    });
+    o += '<text class="v" x="' + (x(4) + 10) + '" y="' + (y(ws[4]) + 4) + '">' + ws[4] + "</text>" +
+      '<text x="' + L + '" y="134">' + when(24) + '</text><text x="' + x(4) + '" y="134" text-anchor="middle">now</text>';
     return o;
   });
 }
@@ -515,7 +643,7 @@ function recallRow(r) {
   var i = RECALL.indexOf(r);
   return '<li><div class="row two-col"><span class="who"><b>' + esc(r.h) + '</b> <span class="small">' + esc(r.o) + '</span><br>' +
     '<span class="small">Last seen <span class="num">' + r.m + '</span> months ago · ' + esc(r.due) + '</span></span>' +
-    (r.sent ? '<span class="small done">Contacted</span>' : '<button class="link" data-draft="' + i + '">Draft message</button>') + "</div></li>";
+    (r.sent ? '<span class="small done">Contacted</span>' : '<button class="btn2" data-draft="' + i + '">Draft message</button>') + "</div></li>";
 }
 function renderRecall() {
   var open = RECALL.filter(function (r) { return !r.sent; }), sent = RECALL.length - open.length;
@@ -556,7 +684,7 @@ $("visitValue").addEventListener("input", renderRecall);
 /* ---------- shared clicks, keys, tooltip ---------- */
 function act(e) {
   var t = e.target;
-  if (t.closest("[data-full]")) { toast("The full record is not part of the demo."); return true; }
+  if (t.closest("[data-full]")) { closeDrawers(); full = recAt; show("record"); return true; }
   if (t.closest("[data-close]")) { closeDrawers(); return true; }
   var d = t.closest("[data-draft]"); if (d) { draft(+d.getAttribute("data-draft")); return true; }
   var r = t.closest("[data-rec]"); if (r) { openRecord(+r.getAttribute("data-rec")); return true; }
@@ -585,7 +713,7 @@ document.addEventListener("focusin", function (e) {
 });
 
 /* ---------- views ---------- */
-var RENDER = { today: renderToday, week: renderWeek, month: renderMonth, recall: renderRecall }, view = "today";
+var RENDER = { today: renderToday, week: renderWeek, month: renderMonth, recall: renderRecall, record: renderRecord }, view = "today";
 function show(v) {
   view = v;
   Object.keys(RENDER).forEach(function (k) { $("v-" + k).hidden = k !== v; });
