@@ -354,8 +354,8 @@ function makeWalk(steps, lays, nEl, fillEl, zoom, onChange, fly) {
     cur = i;
     steps.forEach(function (e, j) { e.classList.toggle("on", j === i); });
     lays.forEach(function (e, j) { e.classList.toggle("on", j === i); });
-    /* fetch the next two pictures now, so the flight never lands on an empty frame */
-    [i + 1, i + 2].forEach(function (k) {
+    /* fetch this picture and the next two now, so the flight never lands on an empty frame */
+    [i, i + 1, i + 2].forEach(function (k) {
       if (lays[k]) [].forEach.call(lays[k].querySelectorAll("img"), function (im) { im.loading = "eager"; });
     });
     if (nEl) nEl.textContent = two(i + 1) + " / " + two(n);
