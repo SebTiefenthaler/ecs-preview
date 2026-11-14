@@ -12,14 +12,13 @@
    this page is invented. Nothing is stored and nothing is sent.
    Look: black on white, one level of thin-bordered containers with rows inside. */
 @font-face{font-family:"Inter Tight";font-weight:400 600;font-display:swap;src:url("assets/fonts/inter-tight.woff2") format("woff2")}
-@font-face{font-family:"IBM Plex Mono";font-weight:400;font-display:swap;src:url("assets/fonts/plex-mono-400.woff2") format("woff2")}
 :root{
   color-scheme:light;
   --bg:#fff; --sub:#fafafa; --ink:#0a0a0a; --mute:#666; --line:#eaeaea; --field:#fff;
   --signal:#e5484d; --ok:#17794a; --warn:#b76e00;
   /* chart series, fixed order: 1 hospital, 2 on the road, then the revenue parts */
   --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s4:#eda100; --s5:#e87ba4;
-  --f:"Inter Tight",-apple-system,"Segoe UI",sans-serif; --m:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  --f:"Inter Tight",-apple-system,"Segoe UI",sans-serif; --m:var(--f);
   --r:12px;
 }
 @media (prefers-color-scheme:dark){:root{
@@ -77,7 +76,7 @@ h2{font-size:14px;font-weight:600;margin:0}
 .chart svg{display:block;width:100%;height:auto;overflow:visible}
 .chart text{font-family:var(--f);font-size:12px;fill:var(--mute)}
 .chart text.v{fill:var(--ink)}
-.chart text.mono{font-family:var(--m);font-size:11px}
+.chart text.mono{font-family:var(--m);font-size:12px;font-variant-numeric:tabular-nums}
 .chart .grid{stroke:var(--line);stroke-width:1}
 .chart .hit{cursor:pointer}
 .chart .hit:hover,.chart .hit:focus{opacity:.78;outline:none}
